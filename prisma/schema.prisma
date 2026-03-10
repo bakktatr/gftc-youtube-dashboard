@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Video {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // YouTube 기본 정보
+  videoId     String   @unique // YouTube 비디오 ID (예: "dQw4w9WgXcQ")
+  title       String            // 제목
+  publishedAt DateTime          // 업로드 날짜
+  duration    Int      @default(0) // 영상 길이(초)
+
+  // YouTube Analytics 지표
+  views               Int    @default(0)  // 조회수
+  subscribersGained   Int    @default(0)  // 구독자 증가
+  subscribersLost     Int    @default(0)  // 구독자 감소
+  averageViewDuration Int    @default(0)  // 평균 시청시간(초)
+  ctr                 Float  @default(0)  // 클릭률 (%)
+  retention30s        Float? // 도입부 30초 잔존율 (%)
+
+  // ERP 리드 데이터
+  leadCount          Int     @default(0) // 유튜브 → 랜딩페이지 → 폼 작성 리드 수
+
+  // 카테고리 (AI 자동분류 or 수동)
+  category           String? // 카테고리명
+  categoryConfidence Float?  // AI 분류 신뢰도 (0~1)
+  categoryManual     Boolean @default(false) // 수동 지정 여부
+
+  // 동기화 메타데이터
+  lastSyncAt DateTime?
+
+  @@index([publishedAt])
+  @@index([category])
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String   @unique
+  color     String   @default("slate") // tailwind color name
+  sortOrder Int      @default(0)
+}
+
+model SyncLog {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  status    String   // "success" | "error" | "partial"
+  videoCount Int     @default(0)
+  duration  Int      @default(0) // 동기화 소요시간 (ms)
+  error     String?
+}
+
+model Settings {
+  id            String    @id @default("default")
+  channelId     String?   // YouTube 채널 ID
+  channelName   String?   // YouTube 채널 이름
+  syncInterval  Int       @default(24) // 동기화 주기 (시간)
+  lastSyncAt    DateTime?
+  erpLastSyncAt DateTime? // ERP 리드 동기화 마지막 시점
+  anthropicKey  String?   // Anthropic API 키 (카테고리 분류용)
+}

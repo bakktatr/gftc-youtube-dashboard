@@ -1,11 +1,13 @@
-// 이 부분이 도구를 만드는 설정입니다.
 generator client {
-  provider = "prisma-client-js" // 명칭을 정확히 prisma-client-js로 써야 합니다.
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql" // sqlite를 postgresql로 변경
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
+
+// 아래에 있는 model Category 등은 절대 건드리지 마세요!
 
 model Video {
   id        String   @id @default(cuid())

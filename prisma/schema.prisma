@@ -1,5 +1,6 @@
+// 이 부분이 도구를 만드는 설정입니다.
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js" // 명칭을 정확히 prisma-client-js로 써야 합니다.
 }
 
 datasource db {
